@@ -173,6 +173,17 @@ babyhappy-ecommerce-demo/
 └── requirements.txt           # Python dependencies
 ```
 
+## 👥 Production Team
+
+This demo represents a real production system built collaboratively:
+
+| Role | Contributor |
+|------|-------------|
+| Full Stack Development (Django, DRF, frontend, payments) | [Kelson Brito](https://github.com/kelsonbrito50) |
+| DevOps & Infrastructure (Docker, Cloudflare, deployment) | [Lucas Amarante](https://github.com/lucasamarante27) |
+
+---
+
 ## 📄 License
 
 This demo is released under the MIT License. The production version at [babyhappyjp.com.br](https://babyhappyjp.com.br) is proprietary.
