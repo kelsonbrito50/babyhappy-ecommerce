@@ -191,3 +191,31 @@ This demo is released under the MIT License. The production version at [babyhapp
 ---
 
 **Built by [Kelson Brito](https://github.com/kelsonbrito50)** 🇧🇷
+
+---
+
+## 🚀 Quick Start (Local Dev)
+
+```bash
+# Clone the demo repo
+git clone https://github.com/kelsonbrito50/babyhappy-ecommerce-demo.git
+cd babyhappy-ecommerce-demo
+
+# Set up environment
+cp .env.example .env  # configure DB, Cielo keys, etc.
+
+# Start with Docker
+docker compose up --build
+
+# Run migrations and seed data
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py loaddata fixtures/demo_products.json
+```
+
+Visit: http://localhost:8000 · Admin: http://localhost:8000/admin
+
+> ⚠️ Cielo payment keys in .env are sandbox credentials — safe for local testing.
+
+---
+
+*Last updated: February 2026 · Maintained by [Kelson Brito](https://github.com/kelsonbrito50)*
