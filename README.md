@@ -18,7 +18,9 @@
 
 ---
 
-<!-- screenshot -->
+<p align="center">
+  <img src="docs/images/preview.png" alt="BabyHappy Preview" width="800" />
+</p>
 
 ---
 
