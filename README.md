@@ -1,221 +1,266 @@
-# 🍼 Baby Happy — E-Commerce Platform Demo
+<!-- HERO -->
+<div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-4.2-092E20?logo=django&logoColor=white)](https://djangoproject.com)
-[![DRF](https://img.shields.io/badge/DRF-3.14-red?logo=django&logoColor=white)](https://django-rest-framework.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docker.com)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-Protected-F38020?logo=cloudflare&logoColor=white)](https://cloudflare.com)
-[![Production](https://img.shields.io/badge/🔴_Live-babyhappyjp.com.br-success)](https://babyhappyjp.com.br)
+# 🍼 BabyHappy E-Commerce Platform
 
-> **Sanitized demo** of a production e-commerce platform built for a Brazilian baby products company.  
-> The production version runs at [babyhappyjp.com.br](https://babyhappyjp.com.br) with real payment processing, inventory management, and customer accounts.
+### Production-grade Django e-commerce powering a real Brazilian baby products brand.
+
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![CI](https://img.shields.io/github/actions/workflow/status/kelsonbrito50/babyhappy-ecommerce/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/kelsonbrito50/babyhappy-ecommerce/actions)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+**[🌐 Live Website](https://babyhappyjp.com.br)** · **[📖 API Docs](#api-endpoints)** · **[🚀 Quick Start](#quick-start)**
+
+</div>
 
 ---
 
-## 🏗️ Architecture
+<!-- screenshot -->
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Nginx     │────▶│  Django     │────▶│ PostgreSQL  │
-│  (reverse   │     │  Gunicorn   │     │   16        │
-│   proxy)    │     │  :8000      │     │  :5432      │
-│  :80/:443   │     └──────┬──────┘     └─────────────┘
-└─────────────┘            │
-                           ▼
-                    ┌─────────────┐
-                    │   Redis     │
-                    │  (cache +   │
-                    │   sessions) │
-                    │  :6379      │
-                    └─────────────┘
-```
+---
 
-**Request flow:** Client → Nginx (SSL termination, static files) → Gunicorn/Django → PostgreSQL/Redis
+## About
 
-## ⚠️ Demo Notice
+This isn't a tutorial project. BabyHappy is a **real Brazilian baby products company**, and this platform is what processes their orders and payments.
 
-This repository is a **sanitized showcase** of the production system. Key differences:
+The production system handles real Cielo credit card transactions, real inventory, and real customers. This repository is the **demo/public version** — the production codebase is private. Everything here is what I built from scratch: the entire application layer, REST API, payment integration, and business logic.
 
-- Payment gateway (Cielo) is **fully mocked** — no real transactions
-- No real customer data or business logic
-- Simplified configuration (no Cloudflare, Sentry, or monitoring integrations)
-- Demo seed data only
+> **100% of the application code** was written by me. The infrastructure and DevOps layer was handled by Lucas Amarante.
 
-## 🚀 Quick Start
+---
 
-### Docker (Recommended)
+## Tech Stack
 
-```bash
-git clone https://github.com/kelsonbrito50/babyhappy-ecommerce-demo.git
-cd babyhappy-ecommerce-demo
-cp .env.example .env
-docker-compose up --build
-```
-
-The API will be available at `http://localhost/api/`.
-
-### Manual Setup
-
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your PostgreSQL and Redis credentials
-
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-```
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/products/` | List products (filters: `category`, `min_price`, `max_price`, `search`) |
-| `GET` | `/api/products/{slug}/` | Product detail with images |
-| `GET` | `/api/cart/` | View current cart |
-| `POST` | `/api/cart/` | Add item to cart (`product_id`, `quantity`) |
-| `POST` | `/api/orders/` | Create order from cart |
-| `POST` | `/api/payments/cielo/authorize/` | Mock Cielo payment authorization |
-| `POST` | `/api/payments/cielo/capture/` | Mock Cielo payment capture |
-
-### Example: Browse Products
-
-```bash
-# List all products
-curl http://localhost/api/products/
-
-# Filter by category
-curl http://localhost/api/products/?category=roupas
-
-# Search
-curl http://localhost/api/products/?search=body+bebe
-
-# Price range
-curl http://localhost/api/products/?min_price=20&max_price=100
-```
-
-### Example: Checkout Flow
-
-```bash
-# Add to cart
-curl -X POST http://localhost/api/cart/ \
-  -H "Content-Type: application/json" \
-  -d '{"product_id": 1, "quantity": 2}'
-
-# Create order
-curl -X POST http://localhost/api/orders/ \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Maria Silva", "email": "maria@example.com", "address": "Rua das Flores, 123"}'
-
-# Authorize payment
-curl -X POST http://localhost/api/payments/cielo/authorize/ \
-  -H "Content-Type: application/json" \
-  -d '{"order_id": 1, "card_number": "4111111111111111", "expiry": "12/2028", "cvv": "123"}'
-
-# Capture payment
-curl -X POST http://localhost/api/payments/cielo/capture/ \
-  -H "Content-Type: application/json" \
-  -d '{"transaction_id": "CIELO-DEMO-xxxxx"}'
-```
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | Python 3.11, Django 4.2, Django REST Framework |
+| Category | Technology |
+|---|---|
+| **Language** | Python 3.11 |
+| **Framework** | Django 4.2 |
+| **REST API** | Django REST Framework |
 | **Database** | PostgreSQL 16 |
-| **Cache** | Redis 7 (sessions + caching) |
-| **Web Server** | Nginx (reverse proxy + static files) |
-| **Containers** | Docker + Docker Compose |
+| **Cache / Queue** | Redis |
+| **Containerization** | Docker + Docker Compose |
+| **Web Server** | Nginx (reverse proxy) |
+| **Payment Gateway** | Cielo (credit card processing) |
 | **CI/CD** | GitHub Actions |
-| **Payments** | Cielo API (mocked in demo) |
+| **Security** | Cloudflare WAF, DDoS protection, SSL/TLS |
 
-## 💡 Skills Demonstrated
+---
 
-- **Full-stack Django development** with clean project architecture
-- **RESTful API design** with filtering, pagination, and proper serialization
-- **Payment gateway integration** (Cielo — Brazil's largest payment processor)
-- **Docker containerization** with multi-service orchestration
-- **PostgreSQL** data modeling with relationships and indexes
-- **Redis** for session management and caching
-- **Nginx** reverse proxy configuration with static file serving
-- **CI/CD pipelines** with automated testing
-- **Production deployment** patterns (environment separation, security headers)
-- **Brazilian e-commerce** domain knowledge (Cielo, CPF validation, BRL currency)
+## Architecture
 
-## 📁 Project Structure
+Four-container Docker setup, production-parity from day one:
 
 ```
-babyhappy-ecommerce-demo/
-├── .github/workflows/ci.yml    # CI/CD pipeline
-├── config/                     # Django project configuration
-│   ├── settings/
-│   │   ├── base.py            # Shared settings
-│   │   ├── development.py     # Dev overrides
-│   │   └── production.py      # Production settings
-│   ├── urls.py                # URL routing
-│   └── wsgi.py                # WSGI entry point
-├── apps/
-│   ├── accounts/              # Custom user (email-based auth)
-│   ├── products/              # Product catalog + categories
-│   ├── cart/                  # Session-based shopping cart
-│   ├── orders/                # Order management
-│   └── payments/              # Cielo payment mock
-├── nginx/nginx.conf           # Nginx configuration
-├── Dockerfile                 # Python app container
-├── docker-compose.yml         # Multi-service orchestration
-└── requirements.txt           # Python dependencies
+┌─────────────────────────────────────────────┐
+│                  Cloudflare                 │
+│           WAF · DDoS · SSL/TLS             │
+└────────────────────┬────────────────────────┘
+                     │
+              ┌──────▼──────┐
+              │    nginx    │  ← reverse proxy, static files
+              └──────┬──────┘
+                     │
+              ┌──────▼──────┐
+              │     web     │  ← Django / Gunicorn (app server)
+              └──────┬──────┘
+                     │
+         ┌───────────┼───────────┐
+         │                       │
+  ┌──────▼──────┐       ┌────────▼────────┐
+  │     db      │       │      redis       │
+  │ PostgreSQL  │       │  cache / queue   │
+  └─────────────┘       └─────────────────┘
 ```
 
-## 👥 Production Team
+---
 
-This demo represents a real production system built collaboratively:
+## Features
 
-| Role | Contributor |
-|------|-------------|
-| **Full Stack Development** — Django backend, PostgreSQL database architecture, Django REST Framework APIs, Cielo payment integration, responsive frontend (HTML/CSS/JS), all application code (100%) | [Kelson Brito](https://github.com/kelsonbrito50) |
-| **DevOps & Infrastructure** — Docker containerization, Cloudflare WAF/SSL/DDoS setup, server deployment | [Lucas Amarante](https://github.com/lucasamarante27) |
+- 🛒 **Product catalog** — categories, filtering, stock management
+- 🧺 **Shopping cart** — session-based, persists across login
+- 💳 **Cielo payment integration** — credit card processing with tokenization
+- 📦 **Order management** — full lifecycle from placement to fulfillment
+- 🔌 **REST API** — DRF-powered, token auth, JSON responses
+- 🔒 **Cloudflare WAF** — DDoS protection and edge security
+- 🐳 **Fully containerized** — one command to spin up the entire stack
+- ⚙️ **GitHub Actions CI** — lint, test, and build on every push
+- 📧 **Order notifications** — automated email on status changes
+- 🔐 **JWT authentication** — secure API access for all user endpoints
 
 ---
 
-## 📄 License
+## Quick Start
 
-This demo is released under the MIT License. The production version at [babyhappyjp.com.br](https://babyhappyjp.com.br) is proprietary.
-
----
-
-**Built by [Kelson Brito](https://github.com/kelsonbrito50)** 🇧🇷
-
----
-
-## 🚀 Quick Start (Local Dev)
+**Prerequisites:** Docker and Docker Compose installed.
 
 ```bash
-# Clone the demo repo
-git clone https://github.com/kelsonbrito50/babyhappy-ecommerce-demo.git
-cd babyhappy-ecommerce-demo
+# 1. Clone the repo
+git clone https://github.com/kelsonbrito50/babyhappy-ecommerce.git
+cd babyhappy-ecommerce
 
-# Set up environment
-cp .env.example .env  # configure DB, Cielo keys, etc.
+# 2. Copy and configure environment variables
+cp .env.example .env
+# Edit .env with your credentials (see .env.example for all required vars)
 
-# Start with Docker
-docker compose up --build
+# 3. Spin up all containers
+docker-compose up --build
 
-# Run migrations and seed data
-docker compose exec web python manage.py migrate
-docker compose exec web python manage.py loaddata fixtures/demo_products.json
+# 4. Apply migrations and load initial data
+docker-compose exec web python manage.py migrate
+docker-compose exec web python manage.py loaddata fixtures/initial_data.json
+
+# 5. Create a superuser (optional)
+docker-compose exec web python manage.py createsuperuser
 ```
 
-Visit: http://localhost:8000 · Admin: http://localhost:8000/admin
-
-> ⚠️ Cielo payment keys in .env are sandbox credentials — safe for local testing.
+App will be available at **http://localhost:8000**
+Admin panel at **http://localhost:8000/admin**
 
 ---
 
-*Last updated: February 2026 · Maintained by [Kelson Brito](https://github.com/kelsonbrito50)*
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `SECRET_KEY` | Django secret key |
+| `DEBUG` | `True` for dev, `False` for prod |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string |
+| `CIELO_MERCHANT_ID` | Cielo merchant ID |
+| `CIELO_MERCHANT_KEY` | Cielo merchant key |
+| `EMAIL_HOST` | SMTP host for notifications |
+
+---
+
+## API Endpoints
+
+All endpoints are prefixed with `/api/v1/`.
+
+### Authentication
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/auth/register/` | Create new user account |
+| `POST` | `/auth/login/` | Obtain JWT token pair |
+| `POST` | `/auth/token/refresh/` | Refresh access token |
+
+### Products
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/products/` | List all products (paginated) |
+| `GET` | `/products/{id}/` | Product detail |
+| `GET` | `/products/categories/` | List product categories |
+| `GET` | `/products/?category={slug}` | Filter by category |
+
+### Cart
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/cart/` | Get current cart |
+| `POST` | `/cart/items/` | Add item to cart |
+| `PATCH` | `/cart/items/{id}/` | Update item quantity |
+| `DELETE` | `/cart/items/{id}/` | Remove item from cart |
+
+### Checkout & Orders
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/checkout/` | Process order + payment |
+| `GET` | `/orders/` | List user's orders |
+| `GET` | `/orders/{id}/` | Order detail + status |
+
+### Payments
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/payments/charge/` | Initiate Cielo charge |
+| `GET` | `/payments/{id}/status/` | Check payment status |
+| `POST` | `/payments/webhook/` | Cielo callback handler |
+
+---
+
+## What I Learned
+
+Building a payment-integrated e-commerce from scratch for a real client taught me things no course will:
+
+**Payment gateway integration is never straightforward.** Cielo's sandbox behaves differently from production in subtle ways. I built a full abstraction layer around the gateway so the business logic never touches Cielo directly — swapping providers would be a one-file change.
+
+**Docker is non-negotiable for environment parity.** The "works on my machine" problem disappeared the day I containerized everything. CI runs the same containers that production does.
+
+**Database transactions are your safety net.** Order creation, payment charge, and stock deduction are wrapped in a single atomic transaction. If the payment fails, no inventory is touched. This took two failed edge cases to get right.
+
+**Django signals are powerful but dangerous.** I used them for order notifications and learned quickly that uncaught exceptions in signals can silently corrupt your request cycle. Async tasks via Celery would be the right call at higher volume.
+
+**Rate limiting before you need it.** Added Cloudflare rate limiting to the payment endpoint early. Not because we had an attack — because thinking about it after the fact is always worse.
+
+**REST API design is a contract.** Once clients depend on an endpoint, you can't break it. Versioning from day one (`/api/v1/`) saved a painful migration when the checkout flow changed.
+
+---
+
+## Project Structure
+
+```
+babyhappy-ecommerce/
+├── apps/
+│   ├── accounts/       # User auth, profiles
+│   ├── catalog/        # Products, categories
+│   ├── cart/           # Shopping cart logic
+│   ├── orders/         # Order management
+│   └── payments/       # Cielo gateway integration
+├── config/
+│   ├── settings/       # base, dev, prod settings split
+│   └── urls.py
+├── docker/
+│   ├── nginx/          # Nginx config
+│   └── postgres/       # DB init scripts
+├── docker-compose.yml
+├── docker-compose.prod.yml
+└── Makefile            # Convenience commands
+```
+
+---
+
+## Running Tests
+
+```bash
+# Run the full test suite inside the web container
+docker-compose exec web python manage.py test
+
+# With coverage report
+docker-compose exec web coverage run manage.py test
+docker-compose exec web coverage report
+```
+
+---
+
+## CI/CD
+
+GitHub Actions runs on every push and pull request:
+
+1. **Lint** — flake8 + black formatting check
+2. **Test** — full test suite against a PostgreSQL service container
+3. **Build** — Docker image build verification
+
+See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the full pipeline.
+
+---
+
+## Credits
+
+| Role | Person |
+|---|---|
+| Application Development | [Kelson Brito](https://github.com/kelsonbrito50) |
+| DevOps & Infrastructure | Lucas Amarante |
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+Built for **[BabyHappy](https://babyhappyjp.com.br)** — making baby product shopping seamless in Brazil. 🍼
+
+</div>
