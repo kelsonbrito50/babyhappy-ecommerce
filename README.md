@@ -26,7 +26,7 @@
 
 This isn't a tutorial project. BabyHappy is a **real Brazilian baby products company**, and this platform is what processes their orders and payments.
 
-The production system handles real Cielo credit card transactions, real inventory, and real customers. This repository is the **demo/public version** — the production codebase is private. Everything here is what I built from scratch: the entire application layer, REST API, payment integration, and business logic.
+The production system handles real Cielo credit card transactions, real inventory, and real customers at [babyhappyjp.com.br](https://babyhappyjp.com.br). Everything here is what I built from scratch: the entire application layer, REST API, payment integration, and business logic. Sensitive production configs are excluded for security.
 
 > **100% of the application code** was written by me. The infrastructure and DevOps layer was handled by Lucas Amarante.
 
