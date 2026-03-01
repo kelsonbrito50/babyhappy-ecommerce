@@ -24,6 +24,7 @@ Routes:
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
@@ -48,6 +49,9 @@ router.register(r"me", ProfileViewSet, basename="v1-profile")
 # ---------------------------------------------------------------------------
 
 urlpatterns = [
+    # Health check (used by Docker HEALTHCHECK and CI)
+    path("health/", lambda r: HttpResponse("OK"), name="health"),
+
     # Admin
     path("admin/", admin.site.urls),
 

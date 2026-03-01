@@ -1,21 +1,43 @@
 version: "3.9"
 
-services:
-  web:
-    build: .
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
-    volumes:
-      - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/mediafiles
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    networks:
-      - babyhappy_network
+# ─── Shared environment references ─────────────────────────────────────────
+x-app-env: &app-env
+  env_file:
+    - .env
+  depends_on:
+    - db
+    - redis
+  networks:
+    - babyhappy_network
 
+x-app-build: &app-build
+  build: .
+  volumes:
+    - .:/app
+    - static_volume:/app/staticfiles
+    - media_volume:/app/mediafiles
+
+services:
+  # ── Django / Gunicorn ─────────────────────────────────────────────────────
+  web:
+    <<: [*app-build, *app-env]
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+
+  # ── Celery Worker ──────────────────────────────────────────────────────────
+  celery_worker:
+    <<: [*app-build, *app-env]
+    command: celery -A config worker --loglevel=info --concurrency=2
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+
+  # ── Celery Beat (scheduler) ────────────────────────────────────────────────
+  celery_beat:
+    <<: [*app-build, *app-env]
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
     volumes:
@@ -25,11 +47,13 @@ services:
     networks:
       - babyhappy_network
 
+  # ── Redis (broker + cache) ─────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     networks:
       - babyhappy_network
 
+  # ── Nginx (reverse proxy + static files) ──────────────────────────────────
   nginx:
     image: nginx:alpine
     ports:

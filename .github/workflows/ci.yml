@@ -32,11 +32,9 @@ jobs:
 
       - name: Check black formatting
         run: black apps/ config/ --check --diff --line-length=100
-        continue-on-error: true
 
       - name: Check isort import order
         run: isort apps/ config/ --check-only --profile=black
-        continue-on-error: true
 
   # ─── Tests + Coverage ───────────────────────────────────────────────────────
   test:
@@ -61,6 +59,9 @@ jobs:
 
       - name: Run Django system checks
         run: python manage.py check
+
+      - name: Verify health check endpoint exists
+        run: python manage.py shell -c "from django.urls import reverse; reverse('health'); print('Health endpoint OK')"
 
       - name: Run tests with coverage
         run: |
