@@ -98,6 +98,32 @@ jobs:
       - name: Validate OpenAPI schema
         run: python manage.py spectacular --validate --fail-on-warn
 
+  # ─── Security scan ──────────────────────────────────────────────────────────
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Install security tools
+        run: pip install bandit pip-audit
+
+      - name: Run bandit (SAST — static security scan)
+        # -ll → report medium + high severity issues; exits non-zero if any found → breaks build
+        run: bandit -r apps/ config/ -ll -f txt --exclude apps/*/migrations
+
+      - name: Run pip-audit (dependency CVE check)
+        run: pip-audit --requirement requirements.txt --desc on
+
   # ─── Docker build ───────────────────────────────────────────────────────────
   docker:
     name: Docker build
