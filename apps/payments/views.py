@@ -6,6 +6,7 @@ from apps.orders.models import Order
 from .gateway import cielo_gateway
 from .models import Payment
 from .serializers import AuthorizePaymentSerializer, CapturePaymentSerializer, PaymentSerializer
+from .tasks import send_payment_approved_task
 
 
 class CieloAuthorizeView(APIView):
@@ -89,6 +90,7 @@ class CieloCaptureView(APIView):
         if result.success:
             payment.status = Payment.Status.CAPTURED
             payment.save(update_fields=["status", "updated_at"])
+            send_payment_approved_task.delay(payment.pk)
 
         return Response(
             {

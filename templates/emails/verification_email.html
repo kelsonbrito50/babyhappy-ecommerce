@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirme seu e-mail — BabyHappy</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+    .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .header { background: #ff6b9d; color: #fff; padding: 32px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 26px; }
+    .header p  { margin: 8px 0 0; font-size: 14px; opacity: .9; }
+    .body { padding: 32px 24px; color: #333; text-align: center; }
+    .body h2 { color: #ff6b9d; margin-top: 0; }
+    .body p { line-height: 1.6; }
+    .btn { display: inline-block; background: #ff6b9d; color: #fff; text-decoration: none; padding: 14px 36px; border-radius: 4px; font-weight: bold; font-size: 16px; margin: 24px 0; }
+    .expiry { font-size: 13px; color: #888; margin-top: 16px; }
+    .fallback-link { word-break: break-all; font-size: 12px; color: #888; }
+    .footer { background: #f0f0f0; padding: 20px 24px; text-align: center; font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>🍼 BabyHappy</h1>
+      <p>Bem-vindo(a)! Confirme seu cadastro.</p>
+    </div>
+
+    <div class="body">
+      <h2>Olá, {{ user_name }}! 👋</h2>
+      <p>Obrigado por se cadastrar na BabyHappy! Para ativar sua conta e aproveitar todas as vantagens, confirme seu endereço de e-mail clicando no botão abaixo.</p>
+
+      <a href="{{ verification_url }}" class="btn">Confirmar e-mail</a>
+
+      <p class="expiry">⏳ Este link expira em <strong>{{ expiry_hours }} horas</strong>.</p>
+
+      <p>Se o botão não funcionar, copie e cole o link abaixo no seu navegador:</p>
+      <p class="fallback-link">{{ verification_url }}</p>
+
+      <p>Se você não criou uma conta na BabyHappy, ignore este e-mail.</p>
+    </div>
+
+    <div class="footer">
+      <p>BabyHappy — Produtos para bebês com amor ❤️</p>
+      <p>© 2025 BabyHappy. Todos os direitos reservados.</p>
+    </div>
+  </div>
+</body>
+</html>

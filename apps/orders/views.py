@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from apps.cart.models import Cart
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, CreateOrderSerializer
+from .tasks import send_order_confirmation_task
 
 
 class OrderCreateView(APIView):
@@ -52,6 +53,9 @@ class OrderCreateView(APIView):
 
         order.calculate_total()
         cart.items.all().delete()
+
+        # Fire confirmation email asynchronously
+        send_order_confirmation_task.delay(order.pk)
 
         return Response(
             OrderSerializer(order).data,

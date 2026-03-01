@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento Aprovado — BabyHappy</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+    .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .header { background: #28a745; color: #fff; padding: 32px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 26px; }
+    .header .icon { font-size: 48px; display: block; margin-bottom: 8px; }
+    .body { padding: 32px 24px; color: #333; }
+    .body h2 { color: #28a745; margin-top: 0; }
+    .payment-meta { background: #f0fff4; border: 1px solid #c3e6cb; border-radius: 6px; padding: 16px; margin-bottom: 24px; }
+    .payment-meta p { margin: 4px 0; font-size: 14px; }
+    .highlight { font-size: 28px; font-weight: bold; color: #28a745; text-align: center; padding: 16px; }
+    .footer { background: #f0f0f0; padding: 20px 24px; text-align: center; font-size: 12px; color: #888; }
+    .btn { display: inline-block; background: #28a745; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 4px; font-weight: bold; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <span class="icon">✅</span>
+      <h1>Pagamento Aprovado!</h1>
+    </div>
+
+    <div class="body">
+      <h2>Olá, {{ customer_name }}!</h2>
+      <p>Ótima notícia! Seu pagamento foi <strong>aprovado</strong> e seu pedido já está sendo preparado. 🎊</p>
+
+      <div class="payment-meta">
+        <p><strong>Pedido:</strong> #{{ order_number }}</p>
+        <p><strong>Método de pagamento:</strong> {{ payment_method }}</p>
+        <p><strong>Data de aprovação:</strong> {{ payment_date }}</p>
+        <p><strong>ID da transação:</strong> {{ transaction_id }}</p>
+      </div>
+
+      <div class="highlight">R$ {{ amount }}</div>
+
+      <p>Seu pedido será preparado e enviado em breve. Você receberá um novo e-mail com o código de rastreamento assim que seu produto for despachado.</p>
+
+      <a href="{{ site_url }}/orders/{{ order_number }}/" class="btn">Acompanhar pedido</a>
+    </div>
+
+    <div class="footer">
+      <p>BabyHappy — Produtos para bebês com amor ❤️</p>
+      <p>Dúvidas? Entre em contato pelo e-mail <a href="mailto:suporte@babyhappy.com.br">suporte@babyhappy.com.br</a></p>
+      <p>© 2025 BabyHappy. Todos os direitos reservados.</p>
+    </div>
+  </div>
+</body>
+</html>
