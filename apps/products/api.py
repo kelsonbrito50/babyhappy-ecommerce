@@ -9,6 +9,7 @@ Endpoints:
 """
 import logging
 
+from django.conf import settings
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -68,6 +69,58 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["price", "created_at", "name"]
     lookup_field = "slug"
+
+    def get_queryset(self):
+        """
+        Return active products, optionally ranked by full-text search.
+
+        Uses PostgreSQL full-text search (SearchVector + SearchRank) when the
+        database backend is PostgreSQL.  Falls back to a simple icontains filter
+        on SQLite (used in tests / development without Postgres).
+        """
+        qs = (
+            Product.objects.filter(is_active=True)
+            .select_related("category")
+            .prefetch_related("images")
+        )
+
+        search_query = self.request.query_params.get("search", "").strip()
+        if not search_query:
+            return qs
+
+        db_engine = settings.DATABASES["default"]["ENGINE"]
+        is_postgres = "postgresql" in db_engine or "postgis" in db_engine
+
+        if is_postgres:
+            from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+
+            vector = SearchVector(
+                "name", weight="A",
+                config="portuguese",
+            ) + SearchVector(
+                "description", weight="B",
+                config="portuguese",
+            ) + SearchVector(
+                "category__name", weight="C",
+                config="portuguese",
+            )
+            query = SearchQuery(search_query, config="portuguese")
+            qs = (
+                qs.annotate(rank=SearchRank(vector, query))
+                .filter(rank__gt=0)
+                .order_by("-rank")
+            )
+        else:
+            # SQLite fallback: basic icontains on name, description, category name
+            from django.db.models import Q
+
+            qs = qs.filter(
+                Q(name__icontains=search_query)
+                | Q(description__icontains=search_query)
+                | Q(category__name__icontains=search_query)
+            )
+
+        return qs
 
     def get_serializer_class(self):
         if self.action == "retrieve":
