@@ -16,6 +16,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
+    "drf_spectacular",
     "django_filters",
     "apps.accounts",
     "apps.products",
@@ -26,6 +28,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "config.middleware.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -103,4 +106,26 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# drf-spectacular (OpenAPI 3.0 docs)
+SPECTACULAR_SETTINGS = {
+    "TITLE": "BabyHappy E-Commerce API",
+    "DESCRIPTION": (
+        "REST API for BabyHappy — a baby products e-commerce platform. "
+        "Built with Django 4.2 + Django REST Framework."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": r"/api/",
+}
+
+# Structured logging
+from config.logging import get_logging_config  # noqa: E402
+LOGGING = get_logging_config()

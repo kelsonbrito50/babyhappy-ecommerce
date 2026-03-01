@@ -1,27 +1,30 @@
 """Pytest fixtures for BabyHappy e-commerce tests."""
 import pytest
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 
 @pytest.fixture
 def user(db):
     """Create a basic test user."""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
     return User.objects.create_user(
-        username='testuser',
         email='test@example.com',
-        password='TestPassword123!'
+        password='TestPassword123!',
+        first_name='Test',
+        last_name='User',
     )
 
 
 @pytest.fixture
 def admin_user(db):
     """Create a superuser for admin tests."""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
     return User.objects.create_superuser(
-        username='admin',
         email='admin@example.com',
-        password='AdminPass123!'
+        password='AdminPass123!',
+        first_name='Admin',
+        last_name='User',
     )
 
 

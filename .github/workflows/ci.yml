@@ -2,64 +2,116 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.11"
+  DJANGO_SETTINGS_MODULE: config.settings.test
 
 jobs:
+  # ─── Lint & Format ──────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run flake8
+        run: flake8 apps/ config/ --max-line-length=100 --exclude=migrations
+
+      - name: Check black formatting
+        run: black apps/ config/ --check --diff --line-length=100
+        continue-on-error: true
+
+      - name: Check isort import order
+        run: isort apps/ config/ --check-only --profile=black
+        continue-on-error: true
+
+  # ─── Tests + Coverage ───────────────────────────────────────────────────────
   test:
+    name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: babyhappy_test
-          POSTGRES_USER: babyhappy
-          POSTGRES_PASSWORD: babyhappy
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
-      - name: Run migrations
-        env:
-          DATABASE_URL: postgres://babyhappy:babyhappy@localhost:5432/babyhappy_test
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: ci-test-secret-key
-        run: python manage.py migrate
-
-      - name: Run system checks
-        env:
-          DATABASE_URL: postgres://babyhappy:babyhappy@localhost:5432/babyhappy_test
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: ci-test-secret-key
+      - name: Run Django system checks
         run: python manage.py check
 
-  docker:
+      - name: Run tests with coverage
+        run: |
+          python -m pytest apps/ \
+            --cov=apps \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --cov-fail-under=85 \
+            -q
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ─── API Schema validation ──────────────────────────────────────────────────
+  schema:
+    name: Validate OpenAPI schema
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Validate OpenAPI schema
+        run: python manage.py spectacular --validate --fail-on-warn
+
+  # ─── Docker build ───────────────────────────────────────────────────────────
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image
-        run: docker build -t babyhappy-ecommerce .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: babyhappy-ecommerce:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
